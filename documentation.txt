@@ -1,0 +1,7 @@
+Firstly, to solve the problem of converting phone numbers into every potential vanity number I wrote an alogrithm to loop through each digit in the phone number and populate an array with potential combinations.
+This was done using a simple hash map and then referencing the value of the key equal to the current digit being examined.
+I wrote 2 implementations for this, one using basic for loops, and another using built in JavaScript methods.
+
+Secondly. 
+
+Lambda response object was breaking amazon connect.
