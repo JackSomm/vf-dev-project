@@ -45,9 +45,9 @@ const createVanityNumbers = async (number) => {
         // Update total comnbos
         res = tmp;
     }
-    
+
     for (let g = 0; g < res.length; g++) {
-        res[g] = number.slice(1, 2) + '-' + number.slice(2, 5) + '-' + res[g];
+      res[g] = number.slice(1, 2) + '-' + number.slice(2, 5) + '-' + res[g];
     }
     
     return res;
@@ -56,21 +56,28 @@ const createVanityNumbers = async (number) => {
 const createVanityNumbers2 = async(number) => {
   if (!number.length) return [];
 
-  let res = numberMap[number[0]];
+  let slicedNum = number.slice(5);
+  let res = numberMap[slicedNum[0]];
+
   // remove first digit
-  number = number.substr(1);
+  slicedNum = slicedNum.substr(1);
 
   // turn number into array and loop thru each digit
-  number.split('').forEach((digit) => {
+  slicedNum.split('').forEach((digit) => {
     // initialize placeholder
     let tmp = [];
-
     // add each character to the existing combinations in the result variable
     numberMap[digit].forEach((char) => {
-      tmp = tmp.concat(res.map(item => {
+      tmp = tmp.concat(res.map((item) => {
         return item + char;
       }));
     });
+    
+    res = tmp;
+  });
+
+  return res.map((item) => {
+      return number.slice(1, 2) + '-' + number.slice(2, 5) + '-' + item;
   });
 }
 
