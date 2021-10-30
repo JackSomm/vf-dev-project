@@ -10,6 +10,8 @@ The login to examine the contact flow is
 Username: vfoundry
 Password: Vfoundrytest2021
 
+The contact flow is called "Vanity Number Flow"
+
 The phone number to access the contact flow is 1 (800) 214-8854
 
 # Explination of Contact Flow
@@ -41,8 +43,17 @@ Before running any of the above code we want to make sure that the caller hasn't
 I tried to build a function that would return a more robust response, but Amazon Connect broke when the response got too complicated. I'm not sure how to fix that part. It simply returned the computed vanity numbers and a boolean as an object. 
 
 # Challenges
-The first and by far the hardest challenge was creating vanity numbers from a phone number. In the beginning I thought it was best to find all possible letter combinations for a number. The algorithm for this was more understandable to me and it made sense at the time. But I eventually realized that I would have to compare all of the possible cominations to some list of words anyway. So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above. This was challenging though for reason in particular, "best" in this case was too vague. I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic.
 
+### 1. Vanity Numbers
+The first and by far the hardest challenge was creating vanity numbers from a phone number. In the beginning I thought it was best to find all possible letter combinations for a number. The algorithm for this was more understandable to me and it made sense at the time. But I eventually realized that I would have to compare all of the possible cominations to some list of words anyway. 
+
+So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above. This was challenging though for one reason in particular, "best" in this case was too vague. 
+
+I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic. For instance, testing with my phone number results in unusable strings. This made testing the contact flow after determining all the "best" logic hard.
+
+If I were to try and solve the case of a phone number that only had unusable strings as it's result I would try to compare it to words without an exact match. The problem is that I dont' have the computing power in lambda to do that. I originally had a word.txt with thousands of lines, but even when I increased the lambdas timeout limit to 2 miuntes it would fail.
+
+# 2. Problems in AWS Services
 The rest of the challenges pale in comparison to the first. I have never worked in Amazon Connect before so figuring out how to access external variables and making the text-to-speech voice understandable was a bit difficult. Also the arrows really don't want to work the way I wanted them to so making them understandable was annoying.
 
 I ran in to a few permissions problems with the Lambda, but solved those fairly easily with the AWS CLI.
