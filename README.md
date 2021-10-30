@@ -2,7 +2,7 @@
 Development project for VoiceFoundry
 
 # Description
-A basic Amazon Connect integration that takes a contacts phone number, converts it into all possible vanity numbers, then stores and returns the best 5 based off of business logic. Uses Lambda, DynamoDB, and Amazon Connect.
+Takes a contacts phone number from an Amazon Connect contact flow, converts it into potential vanity numbers, and stores the best 5 based on business logic. It then returns 3 to the caller in the same contact flow. Uses Lambda, DynamoDB, and Amazon Connect.
 
 # Configuration
 The Amazon Connect instance is located here[https://voicefoundry-test-jack.my.connect.aws]
@@ -19,30 +19,30 @@ We then handle any unsupported inputs/no input and add those to a loop block in 
 
 In the case where the customer presses 1 we start logging in case there is a problem with the lambda function. This was born more out of necessity since my lambda had been failing due permission errors and responses to that were to complicated for Amazon Connect. I kept it in at the end because it made sense to log in case there was an edge case that I had not anticipated.
 
-Since this lambda function has a relatively short execution time I decided not to add any hold sounds while it ran. If it approached 20 seconds then I would've added some kind of indication that the customer was still connected. After we get a response from the lambda we put the options into a Play Prompt using SSML and interpret the options as phone numbers. This makes it a bit easier to understand I think. Since it's hard to know if the numbers will form actual words I thought it best to say the letters individually.
+Since this lambda function has a relatively short execution time I decided not to add any hold sounds while it ran. If it approached 20 seconds then I would've added some kind of indication that the customer was still connected. After we get a response from the lambda we put the options into a Play Prompt using SSML and interpret the options as phone numbers. This makes it a bit easier to understand I think.
+
+If the lambda function cannot return any good vanity numbers, meaning they were all gibberish, I inform the caller that their number isn't suited for a vanity number and aplogize. It's not a great solution, but in my explination of choosing the "best" vanity numbers I explain why. 
 
 Because it's still a little difficult to understand I loop the options twice in order to make sure that the caller can document their options. Finally everything links to a Play prompt saying "Goodbye". I did this mainly because the actual vanity number options play prompt leads to a loop that says "Once again". There needed to be a complete option and simply disconnecting seemed like a bad choice.
 
 # Explination of the Lambda
-### Converting a phone number to all possible vanity numbers
-I have provided two solutions, each essentially doing the same thing. One uses basic javascript with no frills and the other uses built in functions.
-
-The general idea was to use breadth first search, i.e. build all combinations at the same time. Starting at the children of the root node we add each character to the result and then go to the children of those nodes (i.e. the combinations based on the next digit). We continue like that until we have reached the last digit.
-
-Of course we didn't want the country code or the area code so we start at the 5th index in order to skip all of those numbers. The lambda uses a hash map of the numbers as a reference. 
-
-In this case I set 0 and 1 to be equal to themselves. I considered leaving them out, but replacing them with something else would've added more time complexity. For a little more detail, the function checks all letters for all digits and pushes their combinations to a temporary variable. Once each combination for each letter in the current digit has be created we set the response variable to the temporary variable and move to the next digit.
-
-Since we loop through each digit in the phone number and then each character for a digit the time complexity should be O(3^n) where n equals the digits in the phone number. I think the space complexity is about the same. 
-
-I think this could have been solved using recursion as well, but I couldn't figure that out exactly and this solution better aligns with Lambda best practices.
-
 ### Determining the best vanity numbers
+This was tough. In the end my thought process was this; a good vanity number would have an actual word/name in it. In the case that there were no actual words I would compare all possible combinations of letters (findLetterCombos()) to every word in words.txt. Then I would pick enough to fill the 5 requirement at random (findBest()). 
+
+In my mind there was no way to accomodate for any possible number since there are a lot of numbers that would just have gibberish letter combiniations. In the case that nothing returned, I would simply not return anything and tell the caller to get a new number. I know this isn't a great solution, but as I explain in the Challenges section, I belevie there would be a lot more business logic to determine a better vanity number.
+
+I would have loved to be able to create words that were missing a letter or two, but I wasn't sure how to implement that. I would have liked to pick out words in the middle of the phone number (i.e. 1-800-fun-2222), but I ran out of time for that alogrithim. In createVanityNumbers() I iterate over the array backwards to avoid having to worry about the order of the letters, but that wouldn't be the case if I were to go forward as would be required to find words in the middle of the phonenumber. 
+
+The algorithm to create all letter combinations was made using a breadth first search alogrithim and essentially builds every letter combination at the same time. I believe this could have also been done using recursion, but I'm not sure what the solution would've looked like. I think a backtracking algorithm may have worked. Also since this was being run in a Lambda I wanted to avoid recursion.
 
 ### Saving the results
 Before running any of the above code we want to make sure that the caller hasn't already tried to retrieve their vanity numbers before. We do this to avoid using too much processing power. So we look up the phone number in DynamoDB and return that data if it exists. Since DynamoDB returns an empty object if we don't find the item we check to see if the item has length and if it doesn't we run the algorithm to convert the phone number. 
 
-I tried to build a function that would return a more robust response, but Amazon Connect broke when the response got too complicated. I'm not sure how to fix that part. 
+I tried to build a function that would return a more robust response, but Amazon Connect broke when the response got too complicated. I'm not sure how to fix that part. It simply returned the computed vanity numbers and a boolean as an object. 
 
 # Challenges
-The first challenge was definitely creating the alogrithm to convert the phone number to vanity numbers. Looping through each digit and then looping through each character for a digit made sense, but in the beginning I was just adding them together rather than creating separate combinations. I eventually realized I needed to build basically children combinations and build on them as I looped through each digit and subsequent character.
+The first and by far the hardest challenge was creating vanity numbers from a phone number. In the beginning I thought it was best to find all possible letter combinations for a number. The algorithm for this was more understandable to me and it made sense at the time. But I eventually realized that I would have to compare all of the possible cominations to some list of words anyway. So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above. This was challenging though for reason in particular, "best" in this case was too vague. I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic.
+
+The rest of the challenges pale in comparison to the first. I have never worked in Amazon Connect before so figuring out how to access external variables and making the text-to-speech voice understandable was a bit difficult. Also the arrows really don't want to work the way I wanted them to so making them understandable was annoying.
+
+I ran in to a few permissions problems with the Lambda, but solved those fairly easily with the AWS CLI.
