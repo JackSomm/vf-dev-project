@@ -11,16 +11,6 @@ const contents = fs.readFileSync(path.resolve(__dirname, 'words.txt')).toString(
 const wordList = contents.split('\n');
 wordList.pop() // remove trailing empty new line
 
-const readline = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-   
-  readline.question('enter', name => {
-    createVanityNumbers(name);
-    readline.close();
-  });
-
 const numberMap = {
     '0': ['0'],
     '1': ['1'],
