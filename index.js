@@ -142,6 +142,20 @@ const findBest = (vanities) => {
     return best;
 } 
 
+const buildRes = (success, data) => {
+    if (success) {
+        return {
+            success: success,
+            vanityNumbers: data
+        }
+    } else {
+        return {
+            success: success,
+            error: data
+        }
+    }
+}
+
 exports.handler = async (event) => {
     const phoneNumber = event.Details.ContactData.CustomerEndpoint.Address;
     const getParams = {
@@ -159,6 +173,7 @@ exports.handler = async (event) => {
         console.log(data);
     } catch (err) {
         console.log(err);
+        buildRes(false, err);
     }
     
     // if nothing returns build vanity numbers for the caller
@@ -174,9 +189,10 @@ exports.handler = async (event) => {
         
         try {
             await docClient.put(putParams).promise();
-            return bestNumbers;
+            return buildRes(true, bestNumbers);
         } catch (err) {
             console.log(err);
+            return buildRes(false, err);
         }
     } else {
         return data.Item.vanityNumbers;

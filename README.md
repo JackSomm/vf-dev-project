@@ -5,7 +5,7 @@ Development project for VoiceFoundry
 Takes a contacts phone number from an Amazon Connect contact flow, converts it into potential vanity numbers, and stores the best 5 based on business logic. It then returns 3 to the caller in the same contact flow. Uses Lambda, DynamoDB, and Amazon Connect.
 
 # Configuration
-The Amazon Connect instance is located here[https://voicefoundry-test-jack.my.connect.aws]
+The Amazon Connect instance is located [here](https://voicefoundry-test-jack.my.connect.aws)
 The login to examine the contact flow is
 Username: vfoundry
 Password: Vfoundrytest2021
@@ -13,6 +13,10 @@ Password: Vfoundrytest2021
 The contact flow is called "Vanity Number Flow"
 
 The phone number to access the contact flow is 1 (800) 214-8854
+
+There is a simple CloudFormation stack template (template.yaml) that can be used to create a the lambda function with it's needed permissions.
+
+In order to import the contact flow, please download the importable JSON file from [here](https://vf-dev-project-lambda.s3.us-west-2.amazonaws.com/Vanity+Number+Flow)
 
 # Explination of Contact Flow
 It's obviously best to start with some kind of greeting and indentifying who the customer is calling. While it's a little over kill in this case, by allowing the customer to start the process of converting their phone number to vanity numbers we give them agency and avoid any unecessary function invocations. 
@@ -44,17 +48,16 @@ Before running any of the above code we want to make sure that the caller hasn't
 
 I tried to build a function that would return a more robust response, but Amazon Connect broke when the response got too complicated. I'm not sure how to fix that part. It simply returned the computed vanity numbers and a boolean as an object. 
 
-
 # Potential Web App
 I wasn't able to get around to creating a web app to display the vanity numbers of the last 5 callers, but I think this would've been fairly simple. I would've kept Node as the backend and use the AWS SDK to fetch the most recent entries from DynamoDB. For the frontend, while a bit overkill for something this small, I would've used Vue since it's something I'm familiar with and fairly easy to put together in a short time. I would display the caller's number and subsequent vanity numbers in a table for easy readability.
 # Challenges
 
-### 1. Vanity Numbers
-The first and by far the hardest challenge was creating vanity numbers from a phone number. In the beginning I thought it was best to find all possible letter combinations for a number. The algorithm for this was more understandable to me and it made sense at the time. But I eventually realized that I would have to compare all of the possible cominations to some list of words anyway. 
+### 1. "Best" Vanity Numbers
+The first and by far the hardest challenge was determining the best vanity numbers from a phone number. My original thought was to find all possible letter combinations and the compare those against a list of words. Eventually I decided that filter the list of words was a simpler approach.
 
-So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above in the Determining the best vanity numbers section. This was challenging though for one reason in particular, "best" in this case was extremely open ended, which was one of the points of the exercise. 
+From there I filtered the list of words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above in the Determining the best vanity numbers section. This was challenging though for one reason in particular, "best" in this case was extremely open ended, which was one of the points of the exercise. 
 
-I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic. For instance, testing with my phone number results in unusable strings. This made testing the contact flow after determining all the "best" logic hard.
+I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There (hopefully) wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic. For instance, testing with my phone number results in unusable strings. This made testing the contact flow after determining all the "best" logic hard.
 
 If I were to try and solve the case of a phone number that only had unusable strings as it's result I would try to compare it to words without an exact match. In this case I would try testing words with their vowels removed or missing a letter or two at the end. Those are fairly common middle grounds in vanity numbers. Another problem was my sample size of words. I originally had a words.txt with thousands of lines, but even when I increased the lambda's timeout limit to 2 miuntes it would timeout.
 
@@ -62,3 +65,7 @@ If I were to try and solve the case of a phone number that only had unusable str
 The rest of the challenges pale in comparison to the first. I have never worked in Amazon Connect before so figuring out how to access external variables and making the text-to-speech voice understandable was a bit difficult. Also the arrows really don't want to work the way I wanted them to so making them understandable was annoying.
 
 I ran in to a few permissions problems with the Lambda, but solved those fairly easily with the AWS CLI.
+
+I attempted to make this as an AWS CDK app, but once I added all of my resources and defined my stack the ```cdk synth``` command failed with 
+```Error: construct does not have an associated node. All constructs must extend the "Construct" base class```.
+I looked this up and it seemed to be related to the cdk npm packages. I decided not to go forward with using AWS CDK because I was reaching the deadline.
