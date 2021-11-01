@@ -29,9 +29,11 @@ Because it's still a little difficult to understand I loop the options twice in 
 
 # Explination of the Lambda
 ### Determining the best vanity numbers
+I explain this further down, but as a disclaimer my solution doesn't work for all numbers. Some numbers just don't have a vanity version that makes sense.
+
 This was tough. In the end my thought process was this; a good vanity number would have an actual word/name in it. In the case that there were no actual words I would compare all possible combinations of letters (findLetterCombos()) to every word in words.txt. Then I would pick enough to fill the 5 requirement at random (findBest()). 
 
-In my mind there was no way to accomodate for any possible number since there are a lot of numbers that would just have gibberish letter combiniations. In the case that nothing returned, I would simply not return anything and tell the caller to get a new number. I know this isn't a great solution, but as I explain in the Challenges section, I belevie there would be a lot more business logic to determine a better vanity number.
+In my mind there was no way to accomodate for any possible number since there are a lot of numbers that would just have gibberish letter combiniations. In the case that nothing returned, I would simply not return anything and tell the caller to get a new number. I know this isn't a great solution, but as I explain in the Challenges section, I believe there would be a lot more business logic to determine a better vanity number.
 
 I would have loved to be able to create words that were missing a letter or two, but I wasn't sure how to implement that. I would have liked to pick out words in the middle of the phone number (i.e. 1-800-fun-2222), but I ran out of time for that alogrithim. In createVanityNumbers() I iterate over the array backwards to avoid having to worry about the order of the letters, but that wouldn't be the case if I were to go forward as would be required to find words in the middle of the phonenumber. 
 
@@ -42,16 +44,19 @@ Before running any of the above code we want to make sure that the caller hasn't
 
 I tried to build a function that would return a more robust response, but Amazon Connect broke when the response got too complicated. I'm not sure how to fix that part. It simply returned the computed vanity numbers and a boolean as an object. 
 
+
+# Potential Web App
+I wasn't able to get around to creating a web app to display the vanity numbers of the last 5 callers, but I think this would've been fairly simple. I would've kept Node as the backend and use the AWS SDK to fetch the most recent entries from DynamoDB. For the frontend, while a bit overkill for something this small, I would've used Vue since it's something I'm familiar with and fairly easy to put together in a short time. I would display the caller's number and subsequent vanity numbers in a table for easy readability.
 # Challenges
 
 ### 1. Vanity Numbers
 The first and by far the hardest challenge was creating vanity numbers from a phone number. In the beginning I thought it was best to find all possible letter combinations for a number. The algorithm for this was more understandable to me and it made sense at the time. But I eventually realized that I would have to compare all of the possible cominations to some list of words anyway. 
 
-So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above. This was challenging though for one reason in particular, "best" in this case was too vague. 
+So then I thought it would be better to filter the list words based on the character positons relative to the digit position in the given phone number. The rest of my thought process is explained above in the Determining the best vanity numbers section. This was challenging though for one reason in particular, "best" in this case was extremely open ended, which was one of the points of the exercise. 
 
 I believe that in an actual professional situation there would be a lot more business logic to base "best" off of. There wouldn't be random people calling, but rather businesses who had a vertical, a target demographic, a business name, or a product to help guide the logic. For instance, testing with my phone number results in unusable strings. This made testing the contact flow after determining all the "best" logic hard.
 
-If I were to try and solve the case of a phone number that only had unusable strings as it's result I would try to compare it to words without an exact match. The problem is that I dont' have the computing power in lambda to do that. I originally had a word.txt with thousands of lines, but even when I increased the lambdas timeout limit to 2 miuntes it would fail.
+If I were to try and solve the case of a phone number that only had unusable strings as it's result I would try to compare it to words without an exact match. In this case I would try testing words with their vowels removed or missing a letter or two at the end. Those are fairly common middle grounds in vanity numbers. Another problem was my sample size of words. I originally had a words.txt with thousands of lines, but even when I increased the lambda's timeout limit to 2 miuntes it would timeout.
 
 # 2. Problems in AWS Services
 The rest of the challenges pale in comparison to the first. I have never worked in Amazon Connect before so figuring out how to access external variables and making the text-to-speech voice understandable was a bit difficult. Also the arrows really don't want to work the way I wanted them to so making them understandable was annoying.
