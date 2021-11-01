@@ -61,7 +61,7 @@ I believe that in an actual professional situation there would be a lot more bus
 
 If I were to try and solve the case of a phone number that only had unusable strings as it's result I would try to compare it to words without an exact match. In this case I would try testing words with their vowels removed or missing a letter or two at the end. Those are fairly common middle grounds in vanity numbers. Another problem was my sample size of words. I originally had a words.txt with thousands of lines, but even when I increased the lambda's timeout limit to 2 miuntes it would timeout.
 
-# 2. Problems in AWS Services
+### 2. Problems in AWS Services
 The rest of the challenges pale in comparison to the first. I have never worked in Amazon Connect before so figuring out how to access external variables and making the text-to-speech voice understandable was a bit difficult. Also the arrows really don't want to work the way I wanted them to so making them understandable was annoying.
 
 I ran in to a few permissions problems with the Lambda, but solved those fairly easily with the AWS CLI.
