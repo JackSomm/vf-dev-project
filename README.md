@@ -5,6 +5,7 @@ Development project for VoiceFoundry
 Takes a contacts phone number from an Amazon Connect contact flow, converts it into potential vanity numbers, and stores the best 5 based on business logic. It then returns 3 to the caller in the same contact flow. Uses Lambda, DynamoDB, and Amazon Connect.
 
 # Configuration
+### Amazon Connect
 The Amazon Connect instance is located [here](https://voicefoundry-test-jack.my.connect.aws)
 The login to examine the contact flow is
 Username: vfoundry
@@ -14,9 +15,18 @@ The contact flow is called "Vanity Number Flow"
 
 The phone number to access the contact flow is 1 (800) 214-8854
 
-There is a simple CloudFormation stack template (template.yaml) that can be used to create a the lambda function with it's needed permissions.
+### CloudFormation
+There is a simple CloudFormation stack template (template.yaml) that can be used to create a the lambda function and IAM role for the lambda function. The IAM role give full DynamoDB access, full S3 access, and Lambda execute acces. To deploy using the AWS CLI run the following commands while in the ```vf-dev-project``` directory:
 
-In order to import the contact flow, please download the importable JSON file from [here](https://vf-dev-project-lambda.s3.us-west-2.amazonaws.com/Vanity+Number+Flow)
+Package: ```aws cloudformation package --template-file template.yaml --s3-bucket your-s3-bucket --s3-prefix your-prefix --output-template-file your-template-file-name```
+
+Validate: ```aws cloudformation validate-template --template-body file://your-template-file-name```
+
+Deploy: ```aws cloudformation deploy --template-file your-template-file-name --stack-name your-stack-name --region your-region --capabilities CAPABILITY_NAMED_IAM```
+
+This should deploy the lambda code to your desired region with the necessary permissions.
+### Amazon Connect
+In order to import the contact flow, please download the importable JSON file from [here](https://vf-dev-project-lambda.s3.us-west-2.amazonaws.com/Vanity+Number+Flow) and important into a new contact flow inside of your Amazon Connect instance.
 
 # Explination of Contact Flow
 It's obviously best to start with some kind of greeting and indentifying who the customer is calling. While it's a little over kill in this case, by allowing the customer to start the process of converting their phone number to vanity numbers we give them agency and avoid any unecessary function invocations. 

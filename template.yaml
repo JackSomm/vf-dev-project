@@ -24,9 +24,7 @@ Resources:
       FunctionName:
         Fn::Sub: findVanityNumbers
       Runtime: nodejs14.x
-      Code:
-        S3Bucket: 'vf-dev-project-lambda'
-        S3Key: 'vf-dev-project.zip'
+      Code: lambda/
       Handler: index.handler
       Role:
         Fn::GetAtt: ["LambdaRole", "Arn"]
