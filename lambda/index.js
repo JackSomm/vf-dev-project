@@ -135,6 +135,12 @@ const findBest = (vanities) => {
     return best;
 } 
 
+/**
+ * Tried to implement something like this but it was breaking the contact flow.
+ * @param {boolean} success 
+ * @param {object} data Vanity numbers or error
+ * @returns more robust response
+ */
 const buildRes = (success, data) => {
     if (success) {
         return {
@@ -164,7 +170,7 @@ exports.handler = async (event) => {
         data = await docClient.get(getParams).promise();
     } catch (err) {
         console.log(err);
-        return buildRes(false, err);
+        return err;
     }
     
     // if nothing returns build vanity numbers for the caller
@@ -182,12 +188,12 @@ exports.handler = async (event) => {
         
         try {
             await docClient.put(putParams).promise();
-            return buildRes(true, bestNumbers);
+            return bestNumbers;
         } catch (err) {
             console.log(err);
-            return buildRes(false, err);
+            return err;
         }
     } else {
-        return buildRes(true, data.Item.vanityNumbers);
+        return data.Item.vanityNumbers;
     }
 }
