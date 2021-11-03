@@ -9,7 +9,7 @@ Main code can be found in /lambda/index.js
 # Configuration
 Run ```npm i```
 ### Amazon Connect
-The Amazon Connect instance is located [here](https://voicefoundry-test-jack.my.connect.aws)
+The Amazon Connect instance is located [here](https://voicefoundry-test-jack.my.connect.aws).
 The phone number to access the contact flow is 1 (800) 214-8854
 
 ### CloudFormation
