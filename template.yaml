@@ -26,6 +26,7 @@ Resources:
       Runtime: nodejs14.x
       Code: lambda/
       Handler: index.handler
+      Timeout: 20
       Environment:
         Variables:
           TABLE_NAME: VanityNumbers
