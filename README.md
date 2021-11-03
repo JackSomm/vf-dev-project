@@ -7,6 +7,7 @@ Takes a contacts phone number from an Amazon Connect contact flow, converts it i
 Main code can be found in /lambda/index.js
 
 # Configuration
+Run ```npm i```
 ### Amazon Connect
 The Amazon Connect instance is located [here](https://voicefoundry-test-jack.my.connect.aws)
 The phone number to access the contact flow is 1 (800) 214-8854
@@ -25,7 +26,7 @@ This should deploy the lambda code to your desired region with the necessary per
 In order to import the contact flow, please download the importable JSON file from [here](https://vf-dev-project-lambda.s3.us-west-2.amazonaws.com/Vanity+Number+Flow) and import into a new contact flow inside of your Amazon Connect instance. Or you can use the "Vanity Number Flow" file in this repo.
 
 # Explination of Contact Flow
-It's obviously best to start with some kind of greeting and message indentifying who the customer is calling. While it's a little over kill in this case, by allowing the customer to start the process of converting their phone number to vanity numbers we give them agency and avoid any unecessary function invocations. 
+It's obviously best to start with some kind of greeting and message identifying who the customer is calling. While it's a little over kill in this case, by allowing the customer to start the process of converting their phone number to vanity numbers we give them agency and avoid any unnecessary function invocations. 
 
 We then handle any unsupported inputs/no input and add those to a loop block in order to prompt the customer again. If those loops complete we disconnect the customer. 3 was an arbitrary choice, but by looping and prompting the caller several times we allow for any mistaken inputs or real life distractions. 
 
