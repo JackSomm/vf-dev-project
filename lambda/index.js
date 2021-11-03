@@ -49,20 +49,19 @@ const createVanityNumbers = async(number) => {
     }
 
     if (Object.keys(res).length < 5) {
-        while (Object.keys(res).length < 5) {
-            let vanities = await findLetterCombos(number);
-            let bestSet = await findBest(vanities);
-            let bestArray = Array.from(bestSet);
-            let best = bestArray[[Math.floor(Math.random()*bestArray.length)]]
+        let vanities = await findLetterCombos(number);
+        let bestSet = await findBest(vanities);
+        let bestArray = Array.from(bestSet);
 
+        while (Object.keys(res).length < 5) {
+            let best = bestArray[[Math.floor(Math.random()*bestArray.length)]]
 
             if (!Object.values(res).indexOf(best) > -1) {
                 res[`Option${Object.keys(res).length + 1}`] = best;
             }
         }
     }
-
-    console.log(res);
+    
     return res;
 }
 
@@ -121,24 +120,18 @@ const findBest = (vanities) => {
             }
         });
 
-        // if there are 2 then that's a very good number
-        if (words.length > 1) {
+        // if there are 3 then that's a very good number
+        if (words.length > 2) {
             best.add(vanity);
-        }
-
-        // if there is still space left we compare the leftover vanities to words and find similarities
-        if (best.size < 5) {
-            words.forEach(w => {
-                let percent = ss.compareTwoStrings(vanity, w);
-
-                // if there is a 30% match or greater we take that number
-                if (percent > .3) {
-                    best.add(vanity);
-                }
-            })
         }
     });
 
+    // if even after all the above there still isn't 5 we fill the set with randoms
+    if (best.size < 5) {
+        while (best.size < 5) {
+            best.add(vanities[Math.floor(Math.random()*vanities.length)]);
+        }
+    }
     return best;
 } 
 
@@ -165,19 +158,19 @@ exports.handler = async (event) => {
         }
     }
     let data = {};
-    let bestNumbers = createVanityNumbers(phoneNumber);
 
     // first try to get numbers if the caller has called before
     try {
         data = await docClient.get(getParams).promise();
-        console.log(data);
     } catch (err) {
         console.log(err);
-        buildRes(false, err);
+        return buildRes(false, err);
     }
     
     // if nothing returns build vanity numbers for the caller
-    if (!!!Object.keys(data).length) {    
+    if (!!!Object.keys(data).length) {
+        let bestNumbers = await createVanityNumbers(phoneNumber);
+        
         const putParams = {
             Item: {
                 "phoneNumber": phoneNumber,
@@ -195,6 +188,6 @@ exports.handler = async (event) => {
             return buildRes(false, err);
         }
     } else {
-        return data.Item.vanityNumbers;
+        return buildRes(true, data.Item.vanityNumbers);
     }
 }

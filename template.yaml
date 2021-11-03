@@ -26,5 +26,23 @@ Resources:
       Runtime: nodejs14.x
       Code: lambda/
       Handler: index.handler
+      Environment:
+        Variables:
+          TABLE_NAME: VanityNumbers
       Role:
         Fn::GetAtt: ["LambdaRole", "Arn"]
+  VanityNumberTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VanityNumbers
+      AttributeDefinitions:
+        -
+          AttributeName: phoneNumber
+          AttributeType: S
+      KeySchema:
+        -
+          AttributeName: phoneNumber
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
